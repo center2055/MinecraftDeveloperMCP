@@ -48,15 +48,6 @@ Imagine having a senior developer sitting inside your server console, ready to e
 
 ---
 
-## 🆕 What's New in v1.2.0
-
-- **🔧 LuckPerms Support:** Commands now work with ALL plugins, including LuckPerms and others that previously rejected custom command senders
-- **⚡ Fast `/api` Endpoint:** New synchronous HTTP endpoint for instant responses (no SSE overhead)
-- **📁 Binary File Support:** Upload/download JARs, images, and other binary files via base64
-- **📂 Directory Listing:** Browse server files with sizes
-
----
-
 ## 🚀 Quick Start
 
 ### 1. Install the Plugin
