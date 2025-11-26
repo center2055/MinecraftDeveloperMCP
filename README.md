@@ -1,26 +1,25 @@
 # 🧠 Minecraft Developer MCP
-### *The Bridge Between Your AI and Your Blocky World*
+### *Your Server's New AI Superpower.*
 
 ![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spigot](https://img.shields.io/badge/Spigot-1.20.4-F7CF0D?style=for-the-badge&logo=minecraft&logoColor=white) ![MCP](https://img.shields.io/badge/Protocol-MCP-00A67E?style=for-the-badge&logo=network&logoColor=white)
 
-**Control your Minecraft server directly from Claude, Cursor, or any MCP-compliant AI.** 
-Stop alt-tabbing. Stop manually grepping logs. Just ask your AI to do it.
+**Turn your Minecraft server into an AI-controllable powerhouse.**
+Directly connect Claude, Cursor, or any MCP-compliant AI to your server console and files. No FTP. No alt-tabbing. Just pure, context-aware control.
 
 ---
 
-## ⚡ What Is This?
+## ⚡ What Can It Do?
 
-This is a Spigot/Paper plugin that turns your Minecraft Server into a **Model Context Protocol (MCP) Server**. 
+Imagine having a senior developer sitting inside your server console, ready to execute your every command instantly.
 
-It creates a secure, high-speed bridge that allows AI agents to:
-1.  **👀 Read & Analyze Logs** in real-time.
-2.  **⚡ Execute Commands** and see the *actual* output.
-3.  **📂 Manage Files**, configs, and plugins without touching FTP.
-4.  **🧩 Debug Errors** by letting the AI see the stack trace directly from the source.
+*   **🔍 Debug Faster:** "Read the latest log error and tell me which plugin caused it."
+*   **🛠️ Configure Instantly:** "Change the server MOTD to something festive."
+*   **📦 Manage Plugins:** "Check if Vault is installed and list its version."
+*   **📝 Write Code:** "Create a Skript that gives players a diamond when they join."
 
 ---
 
-## 🛠️ Capabilities
+## 🛠️ Tools & Examples
 
 | Tool | Description | Example Prompt |
 | :--- | :--- | :--- |
@@ -29,6 +28,20 @@ It creates a secure, high-speed bridge that allows AI agents to:
 | `write_file` | Create or edit files. Perfect for config tweaks. | *"Create a new skript file called 'welcome.sk' that greets players."* |
 | `list_plugins` | Get a clean list of all installed plugins & versions. | *"Check if WorldGuard is enabled and up to date."* |
 | `get_logs` | Fetch the last 100 lines of `latest.log`. | *"Why did the server just lag? Check the logs."* |
+
+### 💡 Configuration Examples
+
+**1. Fixing a Broken Config:**
+> **You:** "I messed up my `plugins/LuckPerms/config.yml`. The server says there's a YAML error on line 42. Can you read it and fix the indentation?"
+> **AI:** *Reads file -> Detects tab character -> Writes corrected file.* "Fixed! I replaced the tab with 2 spaces."
+
+**2. Tuning Gameplay:**
+> **You:** "Read `bukkit.yml`. I want to increase the monster spawn limit to 100. Update the file."
+> **AI:** *Reads `bukkit.yml` -> Locates `spawn-limits` -> Updates value -> Saves file.* "Done. Run `/reload` to apply."
+
+**3. Setting up a New Plugin:**
+> **You:** "I just installed Essentials. Create a `kit.yml` configuration that gives new players a stone sword and some bread."
+> **AI:** *Writes the exact YAML structure needed for Essentials kits.*
 
 ---
 
