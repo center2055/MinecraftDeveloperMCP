@@ -1,10 +1,10 @@
 # 🧠 Minecraft Developer MCP
 ### *Your Server's New AI Superpower.*
 
-![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spigot](https://img.shields.io/badge/Spigot-1.20.4-F7CF0D?style=for-the-badge&logo=minecraft&logoColor=white) ![MCP](https://img.shields.io/badge/Protocol-MCP-00A67E?style=for-the-badge&logo=network&logoColor=white)
+![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spigot/Paper](https://img.shields.io/badge/Spigot%20%2F%20Paper-1.20%2B-F7CF0D?style=for-the-badge&logo=minecraft&logoColor=white) ![MCP](https://img.shields.io/badge/Protocol-MCP-00A67E?style=for-the-badge&logo=network&logoColor=white)
 
 **Turn your Minecraft server into an AI-controllable powerhouse.**
-Directly connect Claude, Cursor, or any MCP-compliant AI to your server console and files. No FTP. No alt-tabbing. Just pure, context-aware control.
+Directly connect Claude, Cursor, or any MCP-compliant AI to your **Spigot or Paper** server console and files. No FTP. No alt-tabbing. Just pure, context-aware control.
 
 ---
 
