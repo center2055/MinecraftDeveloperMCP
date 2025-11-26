@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,30 @@ public class ToolHandler {
         addTool(tools, "list_plugins", "List installed plugins", mapper.createObjectNode().put("type", "object"));
         addTool(tools, "get_logs", "Get recent log lines", mapper.createObjectNode().put("type", "object"));
 
+        // Binary file tools
+        ObjectNode readBinarySchema = mapper.createObjectNode();
+        readBinarySchema.put("type", "object");
+        ObjectNode readBinaryProps = mapper.createObjectNode();
+        readBinaryProps.set("path", mapper.createObjectNode().put("type", "string"));
+        readBinarySchema.set("properties", readBinaryProps);
+        addTool(tools, "read_file_base64", "Read a binary file and return as base64", readBinarySchema);
+
+        ObjectNode writeBinarySchema = mapper.createObjectNode();
+        writeBinarySchema.put("type", "object");
+        ObjectNode writeBinaryProps = mapper.createObjectNode();
+        writeBinaryProps.set("path", mapper.createObjectNode().put("type", "string"));
+        writeBinaryProps.set("content", mapper.createObjectNode().put("type", "string").put("description", "Base64 encoded file content"));
+        writeBinarySchema.set("properties", writeBinaryProps);
+        addTool(tools, "write_file_base64", "Write a binary file from base64 encoded content", writeBinarySchema);
+
+        // List directory tool
+        ObjectNode listDirSchema = mapper.createObjectNode();
+        listDirSchema.put("type", "object");
+        ObjectNode listDirProps = mapper.createObjectNode();
+        listDirProps.set("path", mapper.createObjectNode().put("type", "string"));
+        listDirSchema.set("properties", listDirProps);
+        addTool(tools, "list_directory", "List files and directories in a path", listDirSchema);
+
         return result;
     }
 
@@ -77,6 +102,12 @@ public class ToolHandler {
                 return readFile(args.get("path").asText());
             case "write_file":
                 return writeFile(args.get("path").asText(), args.get("content").asText());
+            case "read_file_base64":
+                return readFileBase64(args.get("path").asText());
+            case "write_file_base64":
+                return writeFileBase64(args.get("path").asText(), args.get("content").asText());
+            case "list_directory":
+                return listDirectory(args.has("path") ? args.get("path").asText() : ".");
             case "list_plugins":
                 return listPlugins();
             case "get_logs":
@@ -171,6 +202,70 @@ public class ToolHandler {
         int start = Math.max(0, lines.size() - 100);
         String recentLogs = lines.subList(start, lines.size()).stream().collect(Collectors.joining("\n"));
         return createTextResult(recentLogs);
+    }
+
+    private ObjectNode readFileBase64(String pathStr) throws Exception {
+        Path path = serverRoot.resolve(pathStr).normalize();
+        if (!path.startsWith(serverRoot)) {
+            throw new SecurityException("Access denied: Path is outside server root.");
+        }
+        if (!Files.exists(path)) {
+            throw new IllegalArgumentException("File not found: " + pathStr);
+        }
+        
+        byte[] bytes = Files.readAllBytes(path);
+        String base64 = Base64.getEncoder().encodeToString(bytes);
+        return createTextResult(base64);
+    }
+
+    private ObjectNode writeFileBase64(String pathStr, String base64Content) throws Exception {
+        Path path = serverRoot.resolve(pathStr).normalize();
+        if (!path.startsWith(serverRoot)) {
+            throw new SecurityException("Access denied: Path is outside server root.");
+        }
+        
+        byte[] bytes = Base64.getDecoder().decode(base64Content);
+        Files.createDirectories(path.getParent());
+        Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        return createTextResult("Binary file written successfully to " + pathStr + " (" + bytes.length + " bytes)");
+    }
+
+    private ObjectNode listDirectory(String pathStr) throws Exception {
+        Path path = serverRoot.resolve(pathStr).normalize();
+        if (!path.startsWith(serverRoot)) {
+            throw new SecurityException("Access denied: Path is outside server root.");
+        }
+        if (!Files.exists(path)) {
+            throw new IllegalArgumentException("Directory not found: " + pathStr);
+        }
+        if (!Files.isDirectory(path)) {
+            throw new IllegalArgumentException("Not a directory: " + pathStr);
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        try (var stream = Files.list(path)) {
+            stream.sorted().forEach(p -> {
+                String name = p.getFileName().toString();
+                if (Files.isDirectory(p)) {
+                    sb.append("[DIR]  ").append(name).append("/\n");
+                } else {
+                    try {
+                        long size = Files.size(p);
+                        sb.append("[FILE] ").append(name).append(" (").append(formatSize(size)).append(")\n");
+                    } catch (Exception e) {
+                        sb.append("[FILE] ").append(name).append("\n");
+                    }
+                }
+            });
+        }
+        return createTextResult(sb.toString());
+    }
+
+    private String formatSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
+        if (bytes < 1024 * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
+        return String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024));
     }
 }
 

@@ -28,6 +28,9 @@ Imagine having a senior developer sitting inside your server console, ready to e
 | `write_file` | Create or edit files. Perfect for config tweaks. | *"Create a new skript file called 'welcome.sk' that greets players."* |
 | `list_plugins` | Get a clean list of all installed plugins & versions. | *"Check if WorldGuard is enabled and up to date."* |
 | `get_logs` | Fetch the last 100 lines of `latest.log`. | *"Why did the server just lag? Check the logs."* |
+| `write_file_base64` | Upload binary files (JARs, images) via base64. | *"Upload this new 'SuperSword.jar' to the plugins folder."* |
+| `read_file_base64` | Download binary files as base64 strings. | *"Get the 'world/icon.png' file so I can analyze it."* |
+| `list_directory` | List files in a folder with file sizes. | *"List all files in the 'world/region' directory."* |
 
 ### 💡 Configuration Examples
 
