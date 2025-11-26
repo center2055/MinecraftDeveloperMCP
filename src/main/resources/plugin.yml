@@ -1,0 +1,8 @@
+name: MCPMinecraft
+version: 1.0-SNAPSHOT
+main: com.cursor.mcp.McpPlugin
+api-version: 1.20
+description: Model Context Protocol Server for Minecraft
+authors: [Cursor]
+
+
