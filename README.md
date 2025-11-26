@@ -23,7 +23,7 @@ Imagine having a senior developer sitting inside your server console, ready to e
 
 | Tool | Description | Example Prompt |
 | :--- | :--- | :--- |
-| `execute_command` | Run any console command with full output capture. | *"Give 'Notch' a diamond sword named 'Excalibur'."* |
+| `execute_command` | Run any console command with full output capture. Works with all plugins including LuckPerms! | *"Give 'Notch' a diamond sword named 'Excalibur'."* |
 | `read_file` | Read any text file (configs, logs, data) in the server dir. | *"Read plugins/Essentials/config.yml and tell me the chat format."* |
 | `write_file` | Create or edit files. Perfect for config tweaks. | *"Create a new skript file called 'welcome.sk' that greets players."* |
 | `list_plugins` | Get a clean list of all installed plugins & versions. | *"Check if WorldGuard is enabled and up to date."* |
@@ -48,6 +48,15 @@ Imagine having a senior developer sitting inside your server console, ready to e
 
 ---
 
+## 🆕 What's New in v1.2.0
+
+- **🔧 LuckPerms Support:** Commands now work with ALL plugins, including LuckPerms and others that previously rejected custom command senders
+- **⚡ Fast `/api` Endpoint:** New synchronous HTTP endpoint for instant responses (no SSE overhead)
+- **📁 Binary File Support:** Upload/download JARs, images, and other binary files via base64
+- **📂 Directory Listing:** Browse server files with sizes
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Install the Plugin
@@ -64,7 +73,7 @@ server:
 > **⚠️ SECURITY WARNING:** Anyone with this token has **Console Access**. Make it long and random!
 
 ### 3. Connect Your AI (Cursor Example)
-Add this to your Cursor `mcp.json` config:
+Add this to your Cursor `mcp.json` config (usually at `~/.cursor/mcp.json`):
 
 ```json
 {
@@ -76,6 +85,13 @@ Add this to your Cursor `mcp.json` config:
   }
 }
 ```
+
+> **💡 Pro Tip:** For scripting/automation, you can also use the `/api` endpoint directly for synchronous requests:
+> ```bash
+> curl -X POST "http://YOUR-SERVER-IP:25374/api?token=YOUR-TOKEN" \
+>   -H "Content-Type: application/json" \
+>   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_plugins","arguments":{}}}'
+> ```
 
 ### 4. Unleash the AI
 Reload your AI client. You can now say things like:

@@ -17,8 +17,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
 
 public class ToolHandler {
@@ -129,13 +132,25 @@ public class ToolHandler {
         
         Bukkit.getScheduler().runTask(plugin, () -> {
             try {
+                // First try with custom sender (captures output directly)
                 McpCommandSender sender = new McpCommandSender(Bukkit.getConsoleSender());
-                Bukkit.dispatchCommand(sender, command);
-                String output = sender.getOutput();
-                if (output.isEmpty()) {
-                    output = "Command executed (no output captured).";
+                try {
+                    Bukkit.dispatchCommand(sender, command);
+                    String output = sender.getOutput();
+                    if (output.isEmpty()) {
+                        output = "Command executed (no output captured).";
+                    }
+                    future.complete(output);
+                } catch (IllegalArgumentException e) {
+                    // Some plugins (like LuckPerms) reject custom senders
+                    // Fall back to real console sender with log capture
+                    if (e.getMessage() != null && e.getMessage().contains("vanilla command listener")) {
+                        String output = executeWithLogCapture(command);
+                        future.complete(output);
+                    } else {
+                        throw e;
+                    }
                 }
-                future.complete(output);
             } catch (Exception e) {
                 future.completeExceptionally(e);
             }
@@ -145,6 +160,43 @@ public class ToolHandler {
             return createTextResult(future.get(10, TimeUnit.SECONDS));
         } catch (TimeoutException e) {
             return createTextResult("Command sent but response timed out. The command may still have executed.");
+        }
+    }
+
+    private String executeWithLogCapture(String command) {
+        // Capture log output during command execution
+        List<String> capturedLogs = new CopyOnWriteArrayList<>();
+        
+        Handler logHandler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                if (record.getMessage() != null) {
+                    capturedLogs.add(record.getMessage());
+                }
+            }
+            @Override
+            public void flush() {}
+            @Override
+            public void close() throws SecurityException {}
+        };
+        
+        // Add handler to capture logs
+        java.util.logging.Logger bukkitLogger = Bukkit.getLogger();
+        bukkitLogger.addHandler(logHandler);
+        
+        try {
+            // Execute with real console sender
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+            
+            // Small delay to let async log messages come through
+            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+            
+            if (capturedLogs.isEmpty()) {
+                return "Command executed successfully (via console).";
+            }
+            return String.join("\n", capturedLogs);
+        } finally {
+            bukkitLogger.removeHandler(logHandler);
         }
     }
 
