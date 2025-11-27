@@ -29,6 +29,11 @@ public class McpServer {
         try {
             app = Javalin.create(config -> {
                 config.showJavalinBanner = false;
+                config.bundledPlugins.enableCors(cors -> {
+                    cors.addRule(it -> {
+                        it.anyHost();
+                    });
+                });
             });
 
             app.before(ctx -> {
