@@ -40,6 +40,7 @@ public class ToolHandler {
 
         ObjectNode commandSchema = mapper.createObjectNode();
         commandSchema.put("type", "object");
+        commandSchema.set("required", mapper.createArrayNode().add("command"));
         ObjectNode commandProps = mapper.createObjectNode();
         commandProps.set("command", mapper.createObjectNode().put("type", "string"));
         commandSchema.set("properties", commandProps);
@@ -47,6 +48,7 @@ public class ToolHandler {
 
         ObjectNode readFileSchema = mapper.createObjectNode();
         readFileSchema.put("type", "object");
+        readFileSchema.set("required", mapper.createArrayNode().add("path"));
         ObjectNode readFileProps = mapper.createObjectNode();
         readFileProps.set("path", mapper.createObjectNode().put("type", "string"));
         readFileSchema.set("properties", readFileProps);
@@ -54,6 +56,7 @@ public class ToolHandler {
 
         ObjectNode writeFileSchema = mapper.createObjectNode();
         writeFileSchema.put("type", "object");
+        writeFileSchema.set("required", mapper.createArrayNode().add("path").add("content"));
         ObjectNode writeFileProps = mapper.createObjectNode();
         writeFileProps.set("path", mapper.createObjectNode().put("type", "string"));
         writeFileProps.set("content", mapper.createObjectNode().put("type", "string"));
@@ -66,6 +69,7 @@ public class ToolHandler {
         // Binary file tools
         ObjectNode readBinarySchema = mapper.createObjectNode();
         readBinarySchema.put("type", "object");
+        readBinarySchema.set("required", mapper.createArrayNode().add("path"));
         ObjectNode readBinaryProps = mapper.createObjectNode();
         readBinaryProps.set("path", mapper.createObjectNode().put("type", "string"));
         readBinarySchema.set("properties", readBinaryProps);
@@ -73,6 +77,7 @@ public class ToolHandler {
 
         ObjectNode writeBinarySchema = mapper.createObjectNode();
         writeBinarySchema.put("type", "object");
+        writeBinarySchema.set("required", mapper.createArrayNode().add("path").add("content"));
         ObjectNode writeBinaryProps = mapper.createObjectNode();
         writeBinaryProps.set("path", mapper.createObjectNode().put("type", "string"));
         writeBinaryProps.set("content", mapper.createObjectNode().put("type", "string").put("description", "Base64 encoded file content"));
@@ -82,6 +87,7 @@ public class ToolHandler {
         // List directory tool
         ObjectNode listDirSchema = mapper.createObjectNode();
         listDirSchema.put("type", "object");
+        listDirSchema.set("required", mapper.createArrayNode().add("path"));
         ObjectNode listDirProps = mapper.createObjectNode();
         listDirProps.set("path", mapper.createObjectNode().put("type", "string"));
         listDirSchema.set("properties", listDirProps);
