@@ -93,6 +93,17 @@ Reload your AI client. You can now say things like:
 
 ---
 
+## ⚠️ Troubleshooting: No Extra Port?
+
+Many hosting providers (Aternos, free tier hosts, etc.) do not allow you to open an extra port like `8080`.
+
+**The Solution: Use a Tunnel (e.g., playit.gg)**
+1.  Install the **[playit.gg plugin](https://playit.gg/)** on your server.
+2.  Create a new **Custom TCP Tunnel** in the playit dashboard pointing to `127.0.0.1:8080` (or whatever local port is in your config).
+3.  Use the public address playit gives you (e.g., `agent-tunnel.playit.gg:12345`) in your `mcp.json`.
+
+---
+
 ## 🤖 Why?
 
 Because **Context is King**. 
