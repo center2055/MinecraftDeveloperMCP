@@ -35,13 +35,15 @@ public class McpProtocol {
                         .put("protocolVersion", "2024-11-05");
                  
                  ObjectNode capabilities = result.putObject("capabilities");
-                 capabilities.putObject("tools");
+                 ObjectNode toolsCap = capabilities.putObject("tools");
+                 toolsCap.put("listChanged", true);
+                 
                  capabilities.putObject("resources"); 
                  capabilities.putObject("prompts"); // Add prompts capability
                  
                  ObjectNode serverInfo = result.putObject("serverInfo");
                  serverInfo.put("name", "MCPMinecraft");
-                 serverInfo.put("version", "1.1.0");
+                 serverInfo.put("version", "1.2.3");
                  
                  return createResponse(id, result);
             }

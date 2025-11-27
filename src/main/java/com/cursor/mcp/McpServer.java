@@ -55,11 +55,17 @@ public class McpServer {
                 sessions.put(sessionId, client);
                 client.keepAlive();
                 
+                plugin.getLogger().info("New SSE Client connected. Session ID: " + sessionId);
+                
                 // Send the endpoint URI event as per MCP HTTP transport
                 // The client will use this to POST messages
-                client.sendEvent("endpoint", "/messages?sessionId=" + sessionId);
+                String endpoint = "/messages?sessionId=" + sessionId;
+                client.sendEvent("endpoint", endpoint);
                 
-                client.onClose(() -> sessions.remove(sessionId));
+                client.onClose(() -> {
+                    sessions.remove(sessionId);
+                    plugin.getLogger().info("SSE Client disconnected. Session ID: " + sessionId);
+                });
             });
 
             app.post("/messages", ctx -> {
