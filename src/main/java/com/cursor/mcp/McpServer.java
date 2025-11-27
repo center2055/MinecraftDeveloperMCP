@@ -3,6 +3,8 @@ package com.cursor.mcp;
 import com.cursor.mcp.protocol.McpProtocol;
 import io.javalin.Javalin;
 import io.javalin.http.sse.SseClient;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +16,7 @@ public class McpServer {
     private Javalin app;
     private final McpProtocol protocol;
     private final Map<String, SseClient> sessions = new ConcurrentHashMap<>();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public McpServer(McpPlugin plugin, int port, String token) {
         this.plugin = plugin;
@@ -76,6 +79,16 @@ public class McpServer {
                 }
 
                 String body = ctx.body();
+                String method = null;
+                try {
+                    JsonNode request = mapper.readTree(body);
+                    if (request.hasNonNull("method")) {
+                        method = request.get("method").asText();
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Failed to parse MCP request method: " + e.getMessage());
+                }
+
                 // Process request
                 String response = protocol.handleRequest(body);
                 
@@ -84,6 +97,16 @@ public class McpServer {
                     if (client != null) {
                         // Send JSON-RPC response via SSE
                         client.sendEvent("message", response);
+                    }
+                }
+                
+                // Let clients know they should fetch the tool list. Some MCP clients
+                // only request tools after receiving this notification when
+                // capabilities.tools.listChanged is true.
+                if ("initialize".equals(method)) {
+                    SseClient client = sessions.get(sessionId);
+                    if (client != null) {
+                        client.sendEvent("message", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/tools/list_changed\"}");
                     }
                 }
                 
@@ -104,6 +127,27 @@ public class McpServer {
                 }
             });
 
+            // Streamable HTTP transport endpoint (newer MCP standard)
+            // This handles both GET (for SSE stream) and POST (for messages) on the same endpoint
+            app.post("/mcp", ctx -> {
+                String body = ctx.body();
+                String response = protocol.handleRequest(body);
+                
+                if (response != null) {
+                    ctx.contentType("application/json");
+                    ctx.result(response);
+                } else {
+                    ctx.status(202).result("Accepted");
+                }
+            });
+
+            // Also support GET on /mcp for clients that expect it
+            app.get("/mcp", ctx -> {
+                ctx.contentType("application/json");
+                // Return server info for discovery
+                ctx.result("{\"name\":\"MCPMinecraft\",\"version\":\"1.2.0\",\"transport\":\"streamable-http\"}");
+            });
+
             app.start(port);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
@@ -116,4 +160,3 @@ public class McpServer {
         }
     }
 }
-
