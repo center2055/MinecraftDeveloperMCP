@@ -15,6 +15,7 @@ public class McpProtocol {
     }
 
     public String handleRequest(String jsonBody) {
+        McpPlugin.getPlugin(McpPlugin.class).getLogger().info("Incoming MCP Request: " + jsonBody);
         Object id = null;
         try {
             JsonNode request = mapper.readTree(jsonBody);
@@ -35,17 +36,35 @@ public class McpProtocol {
                  
                  ObjectNode capabilities = result.putObject("capabilities");
                  capabilities.putObject("tools");
-                 capabilities.putObject("resources"); // Not implemented but declared
+                 capabilities.putObject("resources"); 
+                 capabilities.putObject("prompts"); // Add prompts capability
                  
                  ObjectNode serverInfo = result.putObject("serverInfo");
                  serverInfo.put("name", "MCPMinecraft");
-                 serverInfo.put("version", "1.0.0");
+                 serverInfo.put("version", "1.1.0");
                  
                  return createResponse(id, result);
             }
 
+            if (method.equals("notifications/initialized")) {
+                // Handshake complete
+                return null;
+            }
+
             if (method.equals("tools/list")) {
                 return createResponse(id, toolHandler.listTools());
+            }
+
+            if (method.equals("resources/list")) {
+                 ObjectNode result = mapper.createObjectNode();
+                 result.putArray("resources");
+                 return createResponse(id, result);
+            }
+
+            if (method.equals("prompts/list")) {
+                 ObjectNode result = mapper.createObjectNode();
+                 result.putArray("prompts");
+                 return createResponse(id, result);
             }
 
             if (method.equals("tools/call")) {
@@ -69,10 +88,12 @@ public class McpProtocol {
                 return null; 
             }
 
+            McpPlugin.getPlugin(McpPlugin.class).getLogger().warning("Unknown method: " + method);
             return createError(id, -32601, "Method not found: " + method);
 
         } catch (Exception e) {
-            // e.printStackTrace();
+            McpPlugin.getPlugin(McpPlugin.class).getLogger().severe("Error handling request: " + e.getMessage());
+            e.printStackTrace();
             return createError(id, -32700, "Error: " + e.getMessage());
         }
     }
