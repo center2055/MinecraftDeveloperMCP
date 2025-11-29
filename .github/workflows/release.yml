@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: Build with Maven
+        run: mvn clean package
+        
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        
+      - name: Rename JAR
+        run: |
+          cp target/mcp-minecraft-${{ steps.get_version.outputs.VERSION }}.jar target/MCPMinecraft-${{ steps.get_version.outputs.VERSION }}.jar
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/MCPMinecraft-${{ steps.get_version.outputs.VERSION }}.jar
+          generate_release_notes: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: ${{ secrets.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: target/MCPMinecraft-${{ steps.get_version.outputs.VERSION }}.jar
+          name: "MCPMinecraft ${{ steps.get_version.outputs.VERSION }}"
+          version: "${{ steps.get_version.outputs.VERSION }}"
+          version-type: release
+          changelog: |
+            See [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.get_version.outputs.VERSION }}) for full changelog.
+          game-versions: "1.20.4, 1.20.6, 1.21.1"
+          loaders: paper
+        continue-on-error: true
+
