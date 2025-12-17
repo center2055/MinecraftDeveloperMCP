@@ -5,6 +5,8 @@ import io.javalin.Javalin;
 import io.javalin.http.sse.SseClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,10 +44,13 @@ public class McpServer {
             app.before(ctx -> {
                 String auth = ctx.header("Authorization");
                 String queryToken = ctx.queryParam("token");
+                String sessionId = ctx.queryParam("sessionId");
                 String validToken = "Bearer " + token;
+                boolean hasSession = sessionId != null && sessions.containsKey(sessionId);
                 
                 boolean authorized = (auth != null && auth.equals(validToken)) || 
-                                     (queryToken != null && queryToken.equals(token));
+                                     (queryToken != null && queryToken.equals(token)) ||
+                                     (ctx.path().startsWith("/messages") && hasSession);
 
                 if (!authorized) {
                      ctx.status(401).result("Unauthorized");
@@ -60,9 +65,11 @@ public class McpServer {
                 
                 plugin.getLogger().info("New SSE Client connected. Session ID: " + sessionId);
                 
-                // Send the endpoint URI event as per MCP HTTP transport
-                // The client will use this to POST messages
-                String endpoint = "/messages?sessionId=" + sessionId;
+                // Send the endpoint URI event as per MCP HTTP transport.
+                // Include the token so follow-up POSTs succeed even if the MCP client
+                // does not reuse the original Authorization header.
+                String endpoint = "/messages?sessionId=" + sessionId + "&token=" + 
+                                  URLEncoder.encode(token, StandardCharsets.UTF_8);
                 client.sendEvent("endpoint", endpoint);
                 
                 client.onClose(() -> {
