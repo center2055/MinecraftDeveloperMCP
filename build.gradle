@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+group = 'io.github.center2055'
+version = '2.0.0'
+
+// Compile against the oldest supported API so one jar runs on 1.20 through 26.x.
+// Check against a newer API with:  ./gradlew compileJava -PapiTarget=paper   (or spigot26)
+def apiTarget = (findProperty('apiTarget') ?: 'oldest').toString()
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'spigotmc'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+}
+
+dependencies {
+    switch (apiTarget) {
+        case 'paper':
+            compileOnly 'io.papermc.paper:paper-api:26.3.build.253-stable'
+            break
+        case 'spigot26':
+            compileOnly 'org.spigotmc:spigot-api:26.3-R0.1-SNAPSHOT'
+            break
+        default:
+            compileOnly 'org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT'
+    }
+    // Both ship with every Spigot and Paper server, so nothing gets bundled into the jar.
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
+    compileOnly 'com.google.code.gson:gson:2.10.1'
+
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    // Java 17 bytecode runs on every server from 1.20 (Java 17) to 26.x (Java 25).
+    // Newer APIs are themselves Java 25 class files, so checking against them needs release 25.
+    options.release = apiTarget == 'oldest' ? 17 : 25
+    options.compilerArgs.addAll(['-Xlint:all,-processing,-serial,-options,-classfile'])
+    if (apiTarget == 'oldest') {
+        options.compilerArgs.add('-Werror')
+    }
+}
+
+def pluginVersion = project.version.toString()
+
+processResources {
+    inputs.property 'version', pluginVersion
+    filesMatching('plugin.yml') {
+        expand(version: pluginVersion)
+    }
+}
+
+jar {
+    archiveBaseName = 'DeveloperMCP'
+}
+
+test {
+    useJUnitPlatform()
+}

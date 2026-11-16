@@ -1,5 +1,23 @@
+# DeveloperMCP - lets AI assistants (Claude, Cursor, VS Code, ...) manage this server over MCP.
+# Docs: https://modrinth.com/plugin/minecraftdevelopermcp
+
 server:
-  port: 8080
-  token: "changeme-secure-token-123"
+  # Network address to listen on. 0.0.0.0 means every interface.
+  # Use 127.0.0.1 if the AI client runs on the same machine as the server.
+  host: "0.0.0.0"
+  # Port for the MCP endpoint. It must be open on your host or firewall to reach it from outside.
+  port: 25374
+  # Access token. A random one is generated on first start.
+  # Anyone with it can run console commands and edit files, so keep it secret.
+  # Show it with "dmcp token" in the console, make a new one with "dmcp token regenerate".
+  token: ""
 
-
+tools:
+  # Switch off tools you don't want the AI to have, e.g. [execute_command, write_file_base64, delete_file]
+  # All tools: execute_command, server_info, list_plugins, get_logs, list_directory, read_file,
+  #            write_file, read_file_base64, write_file_base64, delete_file
+  disabled: []
+  # Largest file read_file and read_file_base64 will return, in megabytes (1-64).
+  maxReadSizeMb: 8
+  # Log each tool call to the console (tool name plus the command or path, never file contents).
+  logCalls: true

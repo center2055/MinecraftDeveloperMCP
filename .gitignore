@@ -1,6 +1,17 @@
-target/
-*.iml
-.idea/
-.vscode/
-*.log
+# Gradle
+.gradle/
+build/
 
+# IDE
+.idea/
+*.iml
+.vscode/
+bin/
+
+# Build output and stray jars
+target/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+*.log
+run/
